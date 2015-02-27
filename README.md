@@ -26,3 +26,9 @@ This README outlines the details of collaborating on this Ember addon.
 * `ember build`
 
 For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+
+## Usage
+Currently this wil record all UI interactions to the console.
+
+## Roadmap
+Create an optional UI for the code generation to be output to the browser
