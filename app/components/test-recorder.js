@@ -1,13 +1,16 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  generatedScript: "",
+
   /**
    * Initialize Test recorder
    * @return {undefined}
    */
   didInsertElement: function () {
 
-    var emberSelector = '[id^=ember],[data-ember-action]';
+    var emberSelector = '[id^=ember],[data-ember-action]',
+      self = this;
     $.fn.extend({
       path: function () {
 
@@ -44,7 +47,15 @@ export default Ember.Component.extend({
       var $emberTarget = $target.is(emberSelector) ? $target : $target.parent(emberSelector);
 
       if ($emberTarget.length) {
-        console.log('click("' + $emberTarget.path() + '")');
+        var pathPrint = e.target.id ? "#" + e.target.id : $emberTarget.path();
+        var testLinePrint = 'click("' + pathPrint + '");<br/>' +
+          'andThen(function () {' +
+          '  <br/><br/>' +
+          '});<br/><br/>'
+
+        console.log(testLinePrint);
+        self.set("generatedScript", self.get("generatedScript") + testLinePrint);
+        $("#generatedCode").html(self.get("generatedScript"));
       }
 
     });
