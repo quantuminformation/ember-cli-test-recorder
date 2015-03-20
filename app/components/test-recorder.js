@@ -2,6 +2,18 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   generatedScript: "",
+  currentRouteName: "",
+  onCurrentRouteNameChange: function () {
+    console.log(this.get("currentRouteName"));
+
+    /* //todo alternative?
+     window.onhashchange = function locationHashChanged() {
+     };
+     window.addEventListener('popstate', function locationHashChanged(e) {
+     });
+    * */
+
+  }.observes("currentRouteName"),
 
   /**
    * Initialize Test recorder
@@ -59,6 +71,21 @@ export default Ember.Component.extend({
       }
 
     });
+
+
+
+/*    var target = document.querySelector('body');
+
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        console.log(mutation.type);
+      });
+    });
+    var config = {attributes: true, childList: true, characterData: true};
+
+    observer.observe(target, config);
+    //observer.disconnect();*/
+
 
   }
 });
