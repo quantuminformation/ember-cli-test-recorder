@@ -1,18 +1,20 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  generatedScript: "",
+  generatedScript: "",//holds the script to be rendered in <pre> tags for copyed as source
   currentRouteName: "",
+  routeHasChanged: false, //if true render a test condition for this
   onCurrentRouteNameChange: function () {
-    console.log(this.get("currentRouteName"));
+    //console.log(this.get("currentRouteName"));
 
     /* //todo alternative?
      window.onhashchange = function locationHashChanged() {
      };
      window.addEventListener('popstate', function locationHashChanged(e) {
      });
-    * */
-
+     * */
+    //todo have a timing mechanism or wait for all promises are fulfilled
+    this.set("routeHasChanged", true);
   }.observes("currentRouteName"),
 
   /**
@@ -21,9 +23,11 @@ export default Ember.Component.extend({
    */
   didInsertElement: function () {
 
-    var emberSelector = '[id^=ember],[data-ember-action]',
-      self = this;
-    $.fn.extend({
+    var emberSelector = '[id^=ember],[data-ember-action]';
+    var self = this;
+    var indendation = '  ';//2 spaces
+
+    Ember.$.fn.extend({
       path: function () {
 
         if (this.length !== 1) {
@@ -53,38 +57,42 @@ export default Ember.Component.extend({
       }
     });
 
-    $(document).on('click', function (e) {
+    Ember.$(document).on('click', function (e) {
 
       var $target = $(e.target);
       var $emberTarget = $target.is(emberSelector) ? $target : $target.parent(emberSelector);
 
       if ($emberTarget.length) {
         var pathPrint = e.target.id ? "#" + e.target.id : $emberTarget.path();
-        var testLinePrint = 'click("' + pathPrint + '");<br/>' +
-          'andThen(function () {' +
-          '  <br/><br/>' +
-          '});<br/><br/>'
+        var newTestPrint = 'click("' + pathPrint + '");<br/>' + 'andThen(function () {' + '<br/>';
 
-        console.log(testLinePrint);
-        self.set("generatedScript", self.get("generatedScript") + testLinePrint);
-        $("#generatedCode").html(self.get("generatedScript"));
+        if (self.get("routeHasChanged")) {
+          newTestPrint += indendation + 'equal(currentRouteName(), "' + self.get("currentRouteName") +
+          ', "The page navigates to ' + self.get("currentRouteName") +
+          ' on button click");<br/>'; //todo make reason more dynamic
+          self.set("routeHasChanged", false);
+        }
+
+        newTestPrint += '});<br/><br/>'
+        // console.log(testLinePrint);
+        self.set("generatedScript", self.get("generatedScript") + newTestPrint);
+        $("#generatedCode").html('<pre>' + self.get("generatedScript") + '</pre>');
       }
 
     });
 
 
+    /*    var target = document.querySelector('body');
 
-/*    var target = document.querySelector('body');
+     var observer = new MutationObserver(function (mutations) {
+     mutations.forEach(function (mutation) {
+     console.log(mutation.type);
+     });
+     });
+     var config = {attributes: true, childList: true, characterData: true};
 
-    var observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (mutation) {
-        console.log(mutation.type);
-      });
-    });
-    var config = {attributes: true, childList: true, characterData: true};
-
-    observer.observe(target, config);
-    //observer.disconnect();*/
+     observer.observe(target, config);
+     //observer.disconnect();*/
 
 
   }
