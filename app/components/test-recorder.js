@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  generatedScript: "",//holds the script to be rendered in <pre> tags for copyed as source
+  generatedScript: "",//holds the script to be rendered in <pre> tags for copying as source
   currentRouteName: "",
   routeHasChanged: false, //if true render a test condition for this
   onCurrentRouteNameChange: function () {
@@ -67,8 +67,9 @@ export default Ember.Component.extend({
         var newTestPrint = 'click("' + pathPrint + '");<br/>' + 'andThen(function () {' + '<br/>';
 
         if (self.get("routeHasChanged")) {
-          newTestPrint += indendation + 'equal(currentRouteName(), "' + self.get("currentRouteName") +
-          ', "The page navigates to ' + self.get("currentRouteName") +
+          newTestPrint += indendation + 'equal(currentRouteName(), "' +
+          self.get("currentRouteName") +
+          '", "The page navigates to ' + self.get("currentRouteName") +
           ' on button click");<br/>'; //todo make reason more dynamic
           self.set("routeHasChanged", false);
         }
@@ -81,19 +82,22 @@ export default Ember.Component.extend({
 
     });
 
+    //only observe inside the ember app, get 1st ember div todo possibly move this outside
+    var target = document.querySelector('body [id^=ember]');
 
-    /*    var target = document.querySelector('body');
+    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
-     var observer = new MutationObserver(function (mutations) {
-     mutations.forEach(function (mutation) {
-     console.log(mutation.type);
-     });
-     });
-     var config = {attributes: true, childList: true, characterData: true};
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        console.log(mutation);
+      });
+    });
+    var config = {attributes: true, childList: true, characterData: true};
 
-     observer.observe(target, config);
-     //observer.disconnect();*/
+    observer.observe(target, config);
+    //observer.disconnect();
 
 
   }
 });
+
