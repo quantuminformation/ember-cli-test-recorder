@@ -48,6 +48,13 @@ export default Ember.Component.extend({
 
   currentRouteName: "",
   routeHasChanged: false, //if true render a test condition for this
+
+  actions: {
+    copyToClipBoard: function () {
+      //todo
+    }
+  },
+
   onCurrentRouteNameChange: function () {
     //console.log(this.get("currentRouteName"));
 
@@ -142,6 +149,7 @@ export default Ember.Component.extend({
           //todo hack to fill in mutations
           var withReplacement = self.get("generatedScript").replace(self.get("MUTATIONS_PLACEHOLDER"), self.get("pendingGeneratedDomChangedScript"));
           self.set("generatedScript", withReplacement);
+          self.set("pendingGeneratedDomChangedScript", "") //clear
 
           //wrap in <pre> block to make code well formatted
           self.set("renderedScript", '<pre>' + self.get("generatedScript") + '</pre>');
@@ -159,10 +167,15 @@ export default Ember.Component.extend({
     //todo, fix this hack -> this will fire before the onClick of jquery so we chache the genrated text here for now
     var observer = new MutationObserver(function (mutations) {
 
-      var addedNodesTestText = "";
-      var removedNodesTestText = "";
+
+
+      ///todo this is a hack to stop multipl hits for mutations with the same id (has to do with childlists)
+      var alreadyRemoved = [];
 
       mutations.forEach(function (mutation) {
+
+        var addedNodesTestText = "";
+        var removedNodesTestText = "";
 
         //convert these to Arrays
         var addedNodesArray = Array.prototype.slice.call(mutation.addedNodes);
@@ -176,6 +189,11 @@ export default Ember.Component.extend({
           return node.nodeType !== 3 && node.id;
         });
 
+        if (!addedNodesArray.length && !removedNodesArray.length) {
+          //no point continuing in this iteration if nothing of interest
+          return;
+        }
+
         //mutations should be mutually exclusive?
         if (addedNodesArray.length && removedNodesArray.length) {
           alert("strange");
@@ -183,15 +201,14 @@ export default Ember.Component.extend({
         }
 
         addedNodesArray.forEach(function (node) {
-          addedNodesTestText += indendation + 'equal(find("' + node.id + '").length, 1, "' + node.id + ' shown AFTER user <INSERT REASON>");';
+          addedNodesTestText += indendation + 'equal(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
         });
 
         removedNodesArray.forEach(function (node) {
-          removedNodesTestText += indendation + 'equal(find("' + node.id + '").length, 1, "' + node.id + ' removed AFTER user <INSERT REASON>");';
+          removedNodesTestText += indendation + 'equal(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
         });
 
-        var currentText = self.get("generatedScript");
-        self.set("pendingGeneratedDomChangedScript", addedNodesTestText || removedNodesTestText);
+        self.set("pendingGeneratedDomChangedScript", self.get("pendingGeneratedDomChangedScript") + (addedNodesTestText || removedNodesTestText));
         // self.set("generatedScript", newText);
         console.log(mutation);
       });

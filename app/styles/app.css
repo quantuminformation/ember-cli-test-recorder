@@ -1,0 +1,9 @@
+#renderedScript{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 300px;
+  height: 200px;
+  background-color: aqua;
+  overflow: scroll;
+}
