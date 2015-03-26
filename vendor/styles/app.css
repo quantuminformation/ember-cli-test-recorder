@@ -2,8 +2,9 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 300px;
+  width: 500px;
   height: 200px;
   background-color: aqua;
   overflow: scroll;
+  font-size: 7px;
 }
