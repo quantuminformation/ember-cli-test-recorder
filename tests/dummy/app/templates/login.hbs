@@ -1,7 +1,10 @@
-<p id="login-p-1">This is the login page text.</p>
 
-<input id="login-input-1" type="text" placeholder="login">
-<input id="login-input-2" type="password" placeholder="password">
-<input type="text" placeholder="foo">
-<p>This is the login page text with no id, this will not be recorded in the test for
-    its removal</p>
+{{#foo-component id="login-foo-component-with-nested-components"}}
+    <p>Changes to this should be recorded</p>
+    {{#foo-component id="login-foo-component-nested-1"}}
+        <p>&nbsp;&nbsp; Nested component, changes to this should be recorded</p>
+    {{/foo-component}}
+    {{#foo-component }}
+        <p>&nbsp;&nbsp; Nested component no id, changes to this should NOT be recorded</p>
+    {{/foo-component}}
+{{/foo-component}}

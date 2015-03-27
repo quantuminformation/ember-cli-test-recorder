@@ -12,6 +12,10 @@
         <span class=""></span>&nbsp;Register
     </button>
 </header>
+{{#toggle-component}}
+    <p id="toggle-component-1-p">Toggled content 1 in Application.hbs</p>
+    <p>Toggled content 1 in Application.hbs</p>
+{{/toggle-component}}
 
 {{outlet}}
-{{test-recorder currentRouteName=currentRouteName}}
+{{test-recorder currentRouteName=currentRouteName class="doNotRecord"}}
