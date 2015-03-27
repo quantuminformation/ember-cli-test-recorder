@@ -15,6 +15,8 @@ export default Ember.Component.extend({
   // want this test recorder to sit outside the ember app and not be intrusive
   pendingGeneratedDomChangedScript: "",
 
+  initialObservedTarget: null,// cache this for performance
+
   currentRouteName: "",
   routeHasChanged: false, //if true render a test condition for this
 
@@ -65,6 +67,8 @@ export default Ember.Component.extend({
    * @return {undefined}
    */
   didInsertElement: function () {
+
+    this.set("initialObservedTarget", document.querySelector("body [id^=ember]")); // cache this for performance
 
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
@@ -145,14 +149,12 @@ export default Ember.Component.extend({
 
         //wrap in <pre> block to make code well formatted
         self.set("renderedScript", '<pre>' + self.get("generatedScript") + '</pre>');
-
-
       }
 
     });
 
     /**
-     * Adds observer for targert and generates source code
+     * Adds observer for target and generates source code
      * @param target
      */
     function addObserverForTarget(target) {
@@ -172,6 +174,20 @@ export default Ember.Component.extend({
           //ignore things with no id
           //ignore ember-view wrapper divs
 
+          // This array is used to add new mutation Observers from the newly added DOM
+          var newMutationsFromAddedNodesArray = addedNodesArray.filter(function (node) {
+            var classListArray = node.classList && Array.prototype.slice.call(node.classList);
+            //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
+            var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
+            return node.nodeType !== 3 && !hasDoNotRecordClass;
+          });
+
+          //loop through the above and add observers
+          newMutationsFromAddedNodesArray.forEach(function (node) {
+            addInnerObserversForTarget(node,2); //just drill down 2 levels more
+          })
+
+          //this array is used to generate the source code, we ignore anything with no ID
           addedNodesArray = addedNodesArray.filter(function (node) {
             var classListArray = node.classList && Array.prototype.slice.call(node.classList);
             //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
@@ -179,6 +195,7 @@ export default Ember.Component.extend({
 
             return node.nodeType !== 3 && node.id && !hasDoNotRecordClass;
           });
+
           removedNodesArray = removedNodesArray.filter(function (node) {
             var classListArray = node.classList && Array.prototype.slice.call(node.classList);
             //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
@@ -231,7 +248,7 @@ export default Ember.Component.extend({
 
         if (!hasDoNotRecordClass) {//abort any recording of this dom tree
           addObserverForTarget(child);
-          if (currentLevel <= 6) {
+          if (currentLevel <= 6) {//todo compare with root ember element
             var nextLevel = currentLevel + 1;
             addInnerObserversForTarget(child, nextLevel)
           }
@@ -240,11 +257,11 @@ export default Ember.Component.extend({
     }
 
     //only observe inside the ember app, get 1st ember div todo possibly move this outside if users wish to look outside ember app
-    var initialObservedTarget = document.querySelector('body [id^=ember]');
-    addObserverForTarget(initialObservedTarget);//observer the initial
+    //var initialObservedTarget = document.querySelector('body [id^=ember]');
+    addObserverForTarget(this.get("initialObservedTarget"));
 
     //this is still WIP, as things are behaving a bit weird..
-    addInnerObserversForTarget(initialObservedTarget, 0);//forms new observers recursively
+    addInnerObserversForTarget(this.get("initialObservedTarget"), 0);//forms new observers recursively
   }
 });
 

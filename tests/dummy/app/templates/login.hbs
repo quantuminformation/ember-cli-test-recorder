@@ -8,3 +8,8 @@
         <p>&nbsp;&nbsp; Nested component no id, changes to this should NOT be recorded</p>
     {{/foo-component}}
 {{/foo-component}}
+
+{{#toggle-component}}
+    <p id="toggle-component-login-p">Should Record</p>
+    <p>Should not record</p>
+{{/toggle-component}}
