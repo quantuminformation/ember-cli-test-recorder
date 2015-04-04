@@ -1,10 +1,11 @@
-#renderedScript{
+#renderedScript {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 500px;
-  height: 400px;
+  width: 150px;
+  height: 100px;
   background-color: aqua;
   overflow: scroll;
   font-size: 10px;
+  resize: both;
 }

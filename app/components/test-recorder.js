@@ -1,8 +1,5 @@
 import Ember from 'ember';
 
-
-
-
 export default Ember.Component.extend({
   classNames: ['dont'],
 
@@ -45,7 +42,7 @@ export default Ember.Component.extend({
     }
   },
 
-  onCurrentRouteNameChange: function () {
+  onCurrentRouteNameChange: Ember.observer('currentRouteName', function () {
     //console.log(this.get("currentRouteName"));
 
     /* //todo alternative?
@@ -56,11 +53,11 @@ export default Ember.Component.extend({
      * */
     //todo have a timing mechanism or wait for all promises are fulfilled
     this.set("routeHasChanged", true);
-  }.observes("currentRouteName"),
+  }),
 
-  onRenderedScriptChange: function () {
+  onRenderedScriptChange: Ember.observer('renderedScript', function () {
     $("#renderedScript").html(this.get("renderedScript"));
-  }.observes("renderedScript"),
+  }),
 
   /**
    * Initialize Test recorder
@@ -184,7 +181,7 @@ export default Ember.Component.extend({
 
           //loop through the above and add observers
           newMutationsFromAddedNodesArray.forEach(function (node) {
-            addInnerObserversForTarget(node,2); //just drill down 2 levels more
+            addInnerObserversForTarget(node, 2); //just drill down 2 levels more
           })
 
           //this array is used to generate the source code, we ignore anything with no ID
