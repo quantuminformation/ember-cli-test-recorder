@@ -2,10 +2,14 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 150px;
-  height: 100px;
-  background-color: aqua;
+  width: 350px;
+  color: white;
+  height: 250px;
+  background-color: #272727;
   overflow: scroll;
   font-size: 10px;
   resize: both;
+}
+.equal{
+  color: cyan;
 }

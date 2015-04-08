@@ -213,11 +213,11 @@ export default Ember.Component.extend({
           }
 
           addedNodesArray.forEach(function (node) {
-            addedNodesTestText += indendation + 'equal(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
+            addedNodesTestText += indendation + '<span class="equal">equal</span>(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
           });
 
           removedNodesArray.forEach(function (node) {
-            removedNodesTestText += indendation + 'equal(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
+            removedNodesTestText += indendation + '<span class="equal">equal</span>(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
           });
 
           self.set("pendingGeneratedDomChangedScript", self.get("pendingGeneratedDomChangedScript") + (addedNodesTestText || removedNodesTestText));
@@ -238,7 +238,7 @@ export default Ember.Component.extend({
      * @param target
      */
     function addInnerObserversForTarget(target, currentLevel) {
-      for (var i = 0; i < target.children.length; i++) {
+      for (var i = 0; target.children && i < target.children.length; i++) {
         var child = target.children[i];
         var classListArray = child.classList && Array.prototype.slice.call(child.classList);
         var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
@@ -258,7 +258,9 @@ export default Ember.Component.extend({
     addObserverForTarget(this.get("initialObservedTarget"));
 
     //this is still WIP, as things are behaving a bit weird..
-    addInnerObserversForTarget(this.get("initialObservedTarget"), 0);//forms new observers recursively
+    if (this.get("initialObservedTarget").children) {
+      addInnerObserversForTarget(this.get("initialObservedTarget"), 0);//forms new observers recursively
+    }
   }
 });
 
