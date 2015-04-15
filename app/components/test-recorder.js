@@ -121,7 +121,7 @@ export default Ember.Component.extend({
         //TEST 1 - > Assert the route is what it a changed to
         // todo hook this to afterModel in the final route
         if (self.get("routeHasChanged")) {
-          newTestPrint += indendation + 'equal(currentRouteName(), "' +
+          newTestPrint += indendation + 'assert.equal(currentRouteName(), "' +
           self.get("currentRouteName") +
           '", "The page navigates to ' + self.get("currentRouteName") +
           ' on button click");<br/>'; //todo make reason more dynamic
@@ -213,11 +213,11 @@ export default Ember.Component.extend({
           }
 
           addedNodesArray.forEach(function (node) {
-            addedNodesTestText += indendation + '<span class="equal">equal</span>(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
+            addedNodesTestText += indendation + 'assert.equal(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
           });
 
           removedNodesArray.forEach(function (node) {
-            removedNodesTestText += indendation + '<span class="equal">equal</span>(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
+            removedNodesTestText += indendation + 'assert.equal(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
           });
 
           self.set("pendingGeneratedDomChangedScript", self.get("pendingGeneratedDomChangedScript") + (addedNodesTestText || removedNodesTestText));
