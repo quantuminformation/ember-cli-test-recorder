@@ -5,7 +5,7 @@ export default Ember.Component.extend({
   classNames: ["lightGrey"],
   actions: {
     toggle: function () {
-      this.set("showContent", !this.get("showContent"))
+      this.set("showContent", !this.get("showContent"));
     }
   }
 });

@@ -5,8 +5,8 @@ export default Ember.Controller.extend({
     goToLoginView: function () {
       this.transitionToRoute("login");
     },
-    goToRegisterView: function () {
-      this.transitionToRoute("register");
+    goToInputsView: function () {
+      this.transitionToRoute("inputs");
     }
   }
 });
