@@ -4,6 +4,7 @@ import {
   test
   } from 'qunit';
 import startApp from 'ember-cli-test-recorder/tests/helpers/start-app';
+//import startApp from '../helpers/start-app.js';
 
 var application;
 
@@ -29,5 +30,5 @@ test('Playback code', function (assert) {
 
   });
 
-
+  stop();
 });

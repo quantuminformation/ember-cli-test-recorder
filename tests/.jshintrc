@@ -19,6 +19,7 @@
     "wait",
     "DS",
     "andThen",
+    "stop",
     "currentURL",
     "currentPath",
     "currentRouteName"
