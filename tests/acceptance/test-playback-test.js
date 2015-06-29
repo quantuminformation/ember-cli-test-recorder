@@ -3,7 +3,7 @@ import {
   module,
   test
   } from 'qunit';
-import startApp from 'ember-cli-test-recorder/tests/helpers/start-app';
+import startApp from 'dummy/tests/helpers/start-app';
 //import startApp from '../helpers/start-app.js';
 
 var application;
