@@ -17,6 +17,16 @@ export default Ember.Component.extend({
   currentRouteName: "",
   routeHasChanged: false, //if true render a test condition for this
 
+  mutationObserversArr: [], // we disconnect these when the component is removed form the canvas (essential for testing)
+
+  willDestroyElement: function () {
+    console.log("destroying");
+    this.get("mutationObserversArr").forEach(function (observer) {
+      observer.disconnect();
+    })
+    //var rect = obj.getBoundingClientRect();
+  },
+
   /**
    * selects all the generated source code when user clicks on the UI for the code
    * @param el
@@ -122,9 +132,9 @@ export default Ember.Component.extend({
         // todo hook this to afterModel in the final route
         if (self.get("routeHasChanged")) {
           newTestPrint += indendation + 'assert.equal(currentRouteName(), "' +
-          self.get("currentRouteName") +
-          '", "The page navigates to ' + self.get("currentRouteName") +
-          ' on button click");<br/>'; //todo make reason more dynamic
+            self.get("currentRouteName") +
+            '", "The page navigates to ' + self.get("currentRouteName") +
+            ' on button click");<br/>'; //todo make reason more dynamic
           self.set("routeHasChanged", false);
         }
 
@@ -132,8 +142,8 @@ export default Ember.Component.extend({
         // the last one of these is replaced each time the mutation observes are run
         newTestPrint += self.get("MUTATIONS_PLACEHOLDER") + '<br/>' +
 
-          //Close the and then block
-        '});<br/><br/>'
+            //Close the and then block
+          '});<br/><br/>'
         // console.log(testLinePrint);
 
         //add to exisiting tests
@@ -227,9 +237,10 @@ export default Ember.Component.extend({
       });
       var config = {attributes: true, childList: true, characterData: true};
 
+      //this is the only place where observe is called so we can track them here too to disconnect
       observer.observe(target, config);
-      //observer.disconnect();
-      //var rect = obj.getBoundingClientRect();
+      self.get("mutationObserversArr").push(observer);
+
     }
 
     /**
