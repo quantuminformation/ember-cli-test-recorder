@@ -1,7 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  classNames: ['dont'],
+  classNames: ['dont'], //this is the output code, we don't want to generate any code form changes in this
 
   MUTATIONS_PLACEHOLDER: "[MUTATIONS_PLACEHOLDER]", //holds text to be added from mutations
 
@@ -23,8 +23,7 @@ export default Ember.Component.extend({
     console.log("destroying");
     this.get("mutationObserversArr").forEach(function (observer) {
       observer.disconnect();
-    })
-    //var rect = obj.getBoundingClientRect();
+    });
   },
 
   /**
@@ -53,15 +52,6 @@ export default Ember.Component.extend({
   },
 
   onCurrentRouteNameChange: Ember.observer('currentRouteName', function () {
-    //console.log(this.get("currentRouteName"));
-
-    /* //todo alternative?
-     window.onhashchange = function locationHashChanged() {
-     };
-     window.addEventListener('popstate', function locationHashChanged(e) {
-     });
-     * */
-    //todo have a timing mechanism or wait for all promises are fulfilled
     this.set("routeHasChanged", true);
   }),
 
@@ -80,10 +70,10 @@ export default Ember.Component.extend({
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
     //listen to clicks on ember items, apart from
-    //the test recorder UI
+    //the test recorder UI (the dont class)
     var emberSelector = '[id^=ember]:not(.dont),[data-ember-action]';
     var self = this;
-    var indendation = ' ';//2 spaces
+    var indentation = ' ';//2 spaces
     var currentNestedLevel = 0; //tracks the nesting level for mutations
 
     Ember.$.fn.extend({
@@ -94,7 +84,9 @@ export default Ember.Component.extend({
         }
 
         var path, node = this;
-        while (node.length) {
+        //this is just to get the path if the user interacts with a non user given id object
+        //we stop at body as qunit tests  find statement is relative to the #ember-testing div
+        while (node.length && node[0].localName !== 'body') {
           var realNode = node[0], name = realNode.localName;
           if (!name) {
             break;
@@ -125,13 +117,21 @@ export default Ember.Component.extend({
       var $emberTarget = $target.is(emberSelector) ? $target : $target.parent(emberSelector);
 
       if ($emberTarget.length) {
-        var pathPrint = e.target.id ? "#" + e.target.id : $emberTarget.path();
+        // we don't want to output a click (#ember123) as this is not reliable
+        var hasEmberIdRegex = /ember[\d]+/;
+        if (e.target.id && !hasEmberIdRegex.test(e.target.id)) {
+          var pathPrint = "#" + e.target.id;
+        } else {
+          //print the nasty DOM path instead, to avoid give your element its own id
+          var pathPrint = $emberTarget.path();
+        }
+
+
         var newTestPrint = 'click("' + pathPrint + '");<br/>' + 'andThen(function () {' + '<br/>';
 
         //TEST 1 - > Assert the route is what it a changed to
-        // todo hook this to afterModel in the final route
         if (self.get("routeHasChanged")) {
-          newTestPrint += indendation + 'assert.equal(currentRouteName(), "' +
+          newTestPrint += indentation + 'assert.equal(currentRouteName(), "' +
             self.get("currentRouteName") +
             '", "The page navigates to ' + self.get("currentRouteName") +
             ' on button click");<br/>'; //todo make reason more dynamic
@@ -141,7 +141,6 @@ export default Ember.Component.extend({
         //TEST 2 - > Place holder that will be replaced with dom visibility Assertions
         // the last one of these is replaced each time the mutation observes are run
         newTestPrint += self.get("MUTATIONS_PLACEHOLDER") + '<br/>' +
-
             //Close the and then block
           '});<br/><br/>'
         // console.log(testLinePrint);
@@ -149,7 +148,6 @@ export default Ember.Component.extend({
         //add to exisiting tests
         self.set("generatedScript", self.get("generatedScript") + newTestPrint);
 
-        //todo hack to fill in mutations
         var withReplacement = self.get("generatedScript").replace(self.get("MUTATIONS_PLACEHOLDER"), self.get("pendingGeneratedDomChangedScript"));
         self.set("generatedScript", withReplacement);
         self.set("pendingGeneratedDomChangedScript", "") //clear
@@ -165,9 +163,9 @@ export default Ember.Component.extend({
      * @param target
      */
     function addObserverForTarget(target) {
-      //todo, fix this hack -> this will fire before the onClick of jquery so we cache the generated text here for now
-      var observer = new MutationObserver(function (mutations) {
 
+
+      var observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
 
           var addedNodesTestText = "";
@@ -195,21 +193,9 @@ export default Ember.Component.extend({
           })
 
           //this array is used to generate the source code, we ignore anything with no ID
-          addedNodesArray = addedNodesArray.filter(function (node) {
-            var classListArray = node.classList && Array.prototype.slice.call(node.classList);
-            //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
-            var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
 
-            return node.nodeType !== 3 && node.id && !hasDoNotRecordClass;
-          });
-
-          removedNodesArray = removedNodesArray.filter(function (node) {
-            var classListArray = node.classList && Array.prototype.slice.call(node.classList);
-            //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
-            var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
-
-            return node.nodeType !== 3 && node.id && !hasDoNotRecordClass;
-          });
+          addedNodesArray = addedNodesArray.filter(unwantedNodesFilter);
+          removedNodesArray = removedNodesArray.filter(unwantedNodesFilter);
 
           if (!addedNodesArray.length && !removedNodesArray.length) {
             //no point continuing in this iteration if nothing of interest
@@ -223,11 +209,11 @@ export default Ember.Component.extend({
           }
 
           addedNodesArray.forEach(function (node) {
-            addedNodesTestText += indendation + 'assert.equal(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
+            addedNodesTestText += indentation + 'assert.equal(find("#' + node.id + '").length, 1, "' + node.id + ' shown AFTER user [INSERT REASON]");' + '<br/>';
           });
 
           removedNodesArray.forEach(function (node) {
-            removedNodesTestText += indendation + 'assert.equal(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
+            removedNodesTestText += indentation + 'assert.equal(find("#' + node.id + '").length, 0, "' + node.id + ' removed AFTER user [INSERT REASON]");' + '<br/>';
           });
 
           self.set("pendingGeneratedDomChangedScript", self.get("pendingGeneratedDomChangedScript") + (addedNodesTestText || removedNodesTestText));
@@ -275,3 +261,17 @@ export default Ember.Component.extend({
   }
 });
 
+function unwantedNodesFilter(node) {
+  var classListArray = node.classList && Array.prototype.slice.call(node.classList);
+  //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
+  var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
+
+  //the check here is we don't want to record
+  // 1 whitespace
+  // 2 things with no id
+  // 3 things that have a hasDoNotRecordClass
+  // 4 things with an ember id, (where a user has not given one but ember needs to add an id)
+  var hasEmberIdRegex = /ember[\d]+/;
+
+  return node.nodeType !== 3 && node.id && !hasDoNotRecordClass && !hasEmberIdRegex.test(node.id);
+}
