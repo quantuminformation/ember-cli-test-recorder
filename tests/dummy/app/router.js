@@ -6,8 +6,10 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function () {
-  this.route('login');
-  this.route('inputs');
+  this.route('index', {'path': ''});
+  this.route('foo');//we just have a route here so we can test for it on transition
 });
 
 export default Router;
+
+

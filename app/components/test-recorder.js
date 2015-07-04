@@ -12,15 +12,13 @@ export default Ember.Component.extend({
   // want this test recorder to sit outside the ember app and not be intrusive
   pendingGeneratedDomChangedScript: "",
 
-  initialObservedTarget: null,// cache this for performance
-
   currentRouteName: "",
   routeHasChanged: false, //if true render a test condition for this
 
   mutationObserversArr: [], // we disconnect these when the component is removed form the canvas (essential for testing)
 
   willDestroyElement: function () {
-    console.log("destroying");
+    console.log("destroying " + this.get("mutationObserversArr").length + " mut observers ");
     this.get("mutationObserversArr").forEach(function (observer) {
       observer.disconnect();
     });
@@ -52,6 +50,7 @@ export default Ember.Component.extend({
   },
 
   onCurrentRouteNameChange: Ember.observer('currentRouteName', function () {
+    console.log(this.get("currentRouteName"));
     this.set("routeHasChanged", true);
   }),
 
@@ -65,8 +64,6 @@ export default Ember.Component.extend({
    */
   didInsertElement: function () {
 
-    this.set("initialObservedTarget", document.querySelector("body [id^=ember]")); // cache this for performance
-
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
     //listen to clicks on ember items, apart from
@@ -76,6 +73,10 @@ export default Ember.Component.extend({
     var indentation = ' ';//2 spaces
     var currentNestedLevel = 0; //tracks the nesting level for mutations
 
+    /**
+     * This is a helper function extension of jquery to give us a dynamic path incase the user hasn't given an
+     * interactive element an ID. We then use  this path to repeat the user action in a test case.
+     */
     Ember.$.fn.extend({
       path: function () {
 
@@ -164,7 +165,6 @@ export default Ember.Component.extend({
      */
     function addObserverForTarget(target) {
 
-
       var observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
 
@@ -175,27 +175,17 @@ export default Ember.Component.extend({
           var addedNodesArray = Array.prototype.slice.call(mutation.addedNodes);
           var removedNodesArray = Array.prototype.slice.call(mutation.removedNodes);
 
-          //ignore non tagged markup like carriage returns //todo investigate why ember does this, potential reflow issue
-          //ignore things with no id
-          //ignore ember-view wrapper divs
-
           // This array is used to add new mutation Observers from the newly added DOM
-          var newMutationsFromAddedNodesArray = addedNodesArray.filter(function (node) {
-            var classListArray = node.classList && Array.prototype.slice.call(node.classList);
-            //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
-            var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
-            return node.nodeType !== 3 && !hasDoNotRecordClass;
-          });
+          var newMutationsFromAddedNodesArray = addedNodesArray.filter(filterDoNotRecordAndWhiteSpace);
 
-          //loop through the above and add observers
+          //loop through the above and add observers, we need to do this dynamically
           newMutationsFromAddedNodesArray.forEach(function (node) {
-            addInnerObserversForTarget(node, 2); //just drill down 2 levels more
+            addObserverForTarget(node); //just drill down 2 levels more
           })
 
-          //this array is used to generate the source code, we ignore anything with no ID
-
-          addedNodesArray = addedNodesArray.filter(unwantedNodesFilter);
-          removedNodesArray = removedNodesArray.filter(unwantedNodesFilter);
+          //this array is used to generate the source code, we filter
+          addedNodesArray = addedNodesArray.filter(filter_DoNotRecord_WhiteSpace_emberID_noID);
+          removedNodesArray = removedNodesArray.filter(filter_DoNotRecord_WhiteSpace_emberID_noID);
 
           if (!addedNodesArray.length && !removedNodesArray.length) {
             //no point continuing in this iteration if nothing of interest
@@ -226,6 +216,8 @@ export default Ember.Component.extend({
       //this is the only place where observe is called so we can track them here too to disconnect
       observer.observe(target, config);
       self.get("mutationObserversArr").push(observer);
+      addInnerObserversForTarget(target, 0);//forms new observers recursively
+
 
     }
 
@@ -250,18 +242,14 @@ export default Ember.Component.extend({
       }
     }
 
-    //only observe inside the ember app, get 1st ember div todo possibly move this outside if users wish to look outside ember app
-    //var initialObservedTarget = document.querySelector('body [id^=ember]');
-    addObserverForTarget(this.get("initialObservedTarget"));
+    //todo possibly move this outside if users wish to look outside ember app
+    var target = document.querySelector('body [id^=ember]');
+    addObserverForTarget(target);//as this does't do the recursive listeners straight away we have to call this:
 
-    //this is still WIP, as things are behaving a bit weird..
-    if (this.get("initialObservedTarget").children) {
-      addInnerObserversForTarget(this.get("initialObservedTarget"), 0);//forms new observers recursively
-    }
   }
 });
 
-function unwantedNodesFilter(node) {
+function filter_DoNotRecord_WhiteSpace_emberID_noID(node) {
   var classListArray = node.classList && Array.prototype.slice.call(node.classList);
   //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
   var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
@@ -274,4 +262,11 @@ function unwantedNodesFilter(node) {
   var hasEmberIdRegex = /ember[\d]+/;
 
   return node.nodeType !== 3 && node.id && !hasDoNotRecordClass && !hasEmberIdRegex.test(node.id);
+}
+
+function filterDoNotRecordAndWhiteSpace(node) {
+  var classListArray = node.classList && Array.prototype.slice.call(node.classList);
+  //var isEmberView = classListArray ? (classListArray.indexOf("ember-view") === -1) : false;
+  var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
+  return node.nodeType !== 3 && !hasDoNotRecordClass;
 }

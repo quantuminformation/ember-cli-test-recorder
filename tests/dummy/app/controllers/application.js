@@ -2,11 +2,11 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
   actions: {
-    goToLoginView: function () {
-      this.transitionToRoute("login");
+    goToIndexRoute: function () {
+      this.transitionToRoute("index");
     },
-    goToInputsView: function () {
-      this.transitionToRoute("inputs");
+    goToFooRoute: function () {
+      this.transitionToRoute("foo");
     }
   }
 });

@@ -25,11 +25,21 @@ module('Acceptance: TestPlayback', {
 test('Playback code', function (assert) {
 //assume that the user starts  on index
   visit('/');
-  click("div:eq(0)>header>button:eq(0)");
+  click("div:eq(0)>header>button:eq(1)");
   andThen(function () {
-    assert.equal(currentRouteName(), "login", "The page navigates to login on button click");
+    assert.equal(currentRouteName(), "foo", "The page navigates to foo on button click");
+    assert.equal(find("#register-input-1").length, 0, "register-input-1 removed AFTER user [INSERT REASON]");
     assert.equal(find("#login-foo-component-with-nested-components").length, 1, "login-foo-component-with-nested-components shown AFTER user [INSERT REASON]");
 
   });
+
+  click("div:eq(0)>header>button:eq(0)");
+  andThen(function () {
+    assert.equal(currentRouteName(), "index", "The page navigates to index on button click");
+    assert.equal(find("#login-foo-component-with-nested-components").length, 0, "login-foo-component-with-nested-components removed AFTER user [INSERT REASON]");
+    assert.equal(find("#register-input-1").length, 1, "register-input-1 shown AFTER user [INSERT REASON]");
+
+  });
+
 
 });
