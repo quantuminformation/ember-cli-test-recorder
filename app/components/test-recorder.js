@@ -64,6 +64,9 @@ export default Ember.Component.extend({
    */
   didInsertElement: function () {
 
+    var route = this.get("currentRouteName") === 'index' ? '/' : this.get("currentRouteName");
+    this.set("generatedScript", 'visit("' + route + '");<br>');
+
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
     //listen to clicks on ember items, apart from
@@ -74,41 +77,43 @@ export default Ember.Component.extend({
     var currentNestedLevel = 0; //tracks the nesting level for mutations
 
     /**
-     * This is a helper function extension of jquery to give us a dynamic path incase the user hasn't given an
-     * interactive element an ID. We then use  this path to repeat the user action in a test case.
+     * this is used for capturing text input fill-ins
      */
-    Ember.$.fn.extend({
-      path: function () {
+    Ember.$('input').on('focusout', function (e) {
 
-        if (this.length !== 1) {
-          throw 'Requires one element.';
-        }
+        if (e.target.localName === 'input' && e.target.type === 'text') {
 
-        var path, node = this;
-        //this is just to get the path if the user interacts with a non user given id object
-        //we stop at body as qunit tests  find statement is relative to the #ember-testing div
-        while (node.length && node[0].localName !== 'body') {
-          var realNode = node[0], name = realNode.localName;
-          if (!name) {
-            break;
+          var $target = $(e.target);
+          var $emberTarget = $target.is(emberSelector) ? $target : $target.parent(emberSelector);
+          if ($emberTarget.length) {
+            // we don't want to output a click (#ember123) as this is not reliable
+            var hasEmberIdRegex = /ember[\d]+/;
+            if (e.target.id && !hasEmberIdRegex.test(e.target.id)) {
+              var pathPrint = "#" + e.target.id;
+            } else {
+              //print the nasty DOM path instead, to avoid give your element its own id
+              var pathPrint = $emberTarget.path();
+            }
+
+            var newTestPrint = 'fillIn("' + pathPrint + '", " ' + e.target.value + '");<br/>'
+
+            //add to existing tests
+            self.set("generatedScript", self.get("generatedScript") + newTestPrint);
+
+            //wrap in <pre> block to make code well formatted
+            self.set("renderedScript", '<pre>' + self.get("generatedScript") + '</pre>');
+          } else {
+            return;
           }
-          name = name.toLowerCase();
-
-          var parent = node.parent();
-
-          var siblings = parent.children(name);
-          if (siblings.length > 1) {
-            name += ':eq(' + siblings.index(realNode) + ')';
-          }
-
-          path = name + (path ? '>' + path : '');
-          node = parent;
         }
-
-        return path;
       }
-    });
+    );
+
     Ember.$(document).on('click', function (e) {
+
+      if (e.target.localName === 'input' && e.target.type === 'text') {
+        return; //for text inputs we capture mouse out and use this to generate a fillIn test helper
+      }
 
       //clear this if not DOM mutations happen ()
       var cleanText = self.get("generatedScript").replace(self.get("MUTATIONS_PLACEHOLDER"), "");
@@ -270,3 +275,39 @@ function filterDoNotRecordAndWhiteSpace(node) {
   var hasDoNotRecordClass = classListArray ? (classListArray.indexOf("doNotRecord") !== -1) : false;
   return node.nodeType !== 3 && !hasDoNotRecordClass;
 }
+
+/**
+ * This is a helper function extension of jquery to give us a dynamic path incase the user hasn't given an
+ * interactive element an ID. We then use  this path to repeat the user action in a test case.
+ */
+Ember.$.fn.extend({
+  path: function () {
+
+    if (this.length !== 1) {
+      throw 'Requires one element.';
+    }
+
+    var path, node = this;
+    //this is just to get the path if the user interacts with a non user given id object
+    //we stop at body as qunit tests  find statement is relative to the #ember-testing div
+    while (node.length && node[0].localName !== 'body') {
+      var realNode = node[0], name = realNode.localName;
+      if (!name) {
+        break;
+      }
+      name = name.toLowerCase();
+
+      var parent = node.parent();
+
+      var siblings = parent.children(name);
+      if (siblings.length > 1) {
+        name += ':eq(' + siblings.index(realNode) + ')';
+      }
+
+      path = name + (path ? '>' + path : '');
+      node = parent;
+    }
+
+    return path;
+  }
+});

@@ -24,12 +24,34 @@ module('Acceptance: TestPlayback', {
  */
 test('Playback code', function (assert) {
 //assume that the user starts  on index
-  visit('/');
+  visit("/");
+  fillIn("#register-input-1", " wd");
+  click("div:eq(0)>form>input:eq(0)");
+  andThen(function () {
+
+  });
+
+  click("div:eq(0)>form>input:eq(1)");
+  andThen(function () {
+
+  });
+
   click("div:eq(0)>header>button:eq(1)");
   andThen(function () {
     assert.equal(currentRouteName(), "foo", "The page navigates to foo on button click");
     assert.equal(find("#register-input-1").length, 0, "register-input-1 removed AFTER user [INSERT REASON]");
     assert.equal(find("#login-foo-component-with-nested-components").length, 1, "login-foo-component-with-nested-components shown AFTER user [INSERT REASON]");
+
+  });
+
+  click("#foobtn");
+  andThen(function () {
+    assert.equal(find("#toggle-component-login-p").length, 0, "toggle-component-login-p removed AFTER user [INSERT REASON]");
+
+  });
+
+  click("div:eq(0)");
+  andThen(function () {
 
   });
 
@@ -41,5 +63,19 @@ test('Playback code', function (assert) {
 
   });
 
+  click("div:eq(0)");
+  andThen(function () {
+
+  });
+
+  click("div:eq(0)");
+  andThen(function () {
+
+  });
+
+  click("div:eq(0)");
+  andThen(function () {
+
+  });
 
 });
