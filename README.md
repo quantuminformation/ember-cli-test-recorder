@@ -8,18 +8,20 @@ expected (happy flow) as then you will have the tests generated for expected beh
 ###Current UI interactions that are recorded for acceptance tests:
 
 * Button clicks, they also generate andThen code blocks. 
+* Text input fill ins. 
 * Record any changes to route
 * Changes in DOM additions/removals, only items with ID's are recorded and that don't have the doNotRecord css class.
 
 ##Usage
 
-The component requires the currentRouteName information from the applicationController and should be placed
-inside the application.hbs template
+To use this, simply include this line of code someone in your app, I recommend in your `app.js`:
 
-```hbs
-{{test-recorder currentRouteName=currentRouteName}}
+```js
+import main from 'ember-cli-test-recorder/main';// jshint ignore:line
 ```
-All elements that match this selector `[id^=ember]:not(.dont),[data-ember-action]` are recorded. 
+Note: we use jshint ignore:line as we don't actually do anything with the main object, it sets everything up by itself
+
+
 If an element doesn't have an id then a dom path selector will be generated to click on this buttonin a test, ie
 ```js
 click("html>body>div>div:eq(0)>button");
@@ -38,9 +40,11 @@ generated code. This happens outside of the ember run loop.
 
 
 ## Roadmap
-* Record text that is entered into inputs 
+* Allow selects to be automated
 * Allow more complex click actions like the steps to click on inputs like select2 to be recorded
 * Ignore clicks on ember elements with no effect
+* Get mutations to work with async effects
+* Separate out recording to its own library and just use ember adapters for code test style
 
 ## Installation
 
