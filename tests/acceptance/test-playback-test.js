@@ -23,8 +23,9 @@ module('Acceptance: TestPlayback', {
  * can play back what was recorded in the browser code recorder.
  */
 test('Playback code', function (assert) {
-//assume that the user starts  on index
-  visit('/');
+
+
+  visit("/");
   click("div:eq(0)>header>button:eq(1)");
   andThen(function () {
     assert.equal(currentRouteName(), "foo", "The page navigates to foo on button click");
@@ -38,8 +39,23 @@ test('Playback code', function (assert) {
     assert.equal(currentRouteName(), "index", "The page navigates to index on button click");
     assert.equal(find("#login-foo-component-with-nested-components").length, 0, "login-foo-component-with-nested-components removed AFTER user [INSERT REASON]");
     assert.equal(find("#register-input-1").length, 1, "register-input-1 shown AFTER user [INSERT REASON]");
+    assert.equal(find("#login-foo-component-nested-1").length, 0, "login-foo-component-nested-1 removed AFTER user [INSERT REASON]");
 
   });
+
+  click("div:eq(0)>form");
+  andThen(function () {
+
+  });
+
+  click("div:eq(0)>p");
+  andThen(function () {
+
+  });
+
+
+
+  //stop();
 
 
 });

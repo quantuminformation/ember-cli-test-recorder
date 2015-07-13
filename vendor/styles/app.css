@@ -1,4 +1,8 @@
-#renderedScript {
+/**
+  this is the UI for the generated test code
+*/
+
+#generatedScript {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -9,4 +13,5 @@
   overflow: scroll;
   font-size: 10px;
   resize: both;
+
 }

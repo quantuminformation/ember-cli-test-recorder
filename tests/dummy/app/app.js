@@ -2,7 +2,7 @@ import Ember from 'ember';
 import Resolver from 'ember/resolver';
 import loadInitializers from 'ember/load-initializers';
 import config from './config/environment';
-import testRecorder from 'ember';
+import main from 'ember-cli-test-recorder/main';// jshint ignore:line
 
 var App;
 
