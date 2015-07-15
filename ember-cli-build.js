@@ -1,10 +1,15 @@
 /* global require, module */
 var EmberApp = require('ember-cli/lib/broccoli/ember-addon');
+//import MyCoolModule from "npm:test-recorder";
 
 module.exports = function(defaults) {
   var app = new EmberApp(defaults, {
     // Add options here
   });
+
+
+  //app.import('node_modules/test-recorder/dist/emberTestRecorder.js');
+
 
   /*
     This build file specifes the options for the dummy test app of this
@@ -12,6 +17,17 @@ module.exports = function(defaults) {
     This build file does *not* influence how the addon or the app using it
     behave. You most likely want to be modifying `./index.js` or app's build file
   */
+
+
+  var mergeTrees = require('broccoli-merge-trees');
+  var pickFiles = require('broccoli-static-compiler');
+  var extraAssets = pickFiles('node_modules/test-recorder/dist/',{
+    srcDir: '/',
+    files: ['**/*'],
+    destDir: '/test-recorder/'
+  });
+
+  module.exports = mergeTrees([app.toTree(), extraAssets]);
 
   return app.toTree();
 };
