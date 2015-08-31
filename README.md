@@ -14,6 +14,12 @@ expected (happy flow) as then you will have the tests generated for expected beh
 
 ##Usage
 
+To install run
+
+```
+ember install ember-cli-test-recorder
+```
+
 To use this, simply include this line of code someone in your app, I recommend in your `app.js`:
 
 ```js
