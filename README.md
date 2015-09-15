@@ -1,3 +1,5 @@
+<a href='https://pledgie.com/campaigns/30176'><img alt='Click here to lend your support to: Integration test recorder for Angular/Ember/React/Vanilla web applications. and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/30176.png?skin_name=chrome' border='0' ></a>
+
 # Ember-cli-test-recorder
 This records the ways you interact with an Ember application, and then generates the code to playback these actions and 
  test results in an acceptance test. The idea is to save you time writing these tests by hand.
