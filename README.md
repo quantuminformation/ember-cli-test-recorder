@@ -1,4 +1,9 @@
-<a href='https://pledgie.com/campaigns/30176'><img alt='Click here to lend your support to: Integration test recorder for Angular/Ember/React/Vanilla web applications. and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/30176.png?skin_name=chrome' border='0' ></a>
+#Note this project will be deprecated in favour of a much more abitious one for any app. 
+
+[https://github.com/QuantumInformation/test-recorder]
+
+Don't worry, full support for ember (with Qunit) will be maintained, its just that it doesn't need to sit inside an ember cli-addon.
+An ember app will be used as an exmaple inside the above repo shortly.
 
 # Ember-cli-test-recorder
 This records the ways you interact with an Ember application, and then generates the code to playback these actions and 
