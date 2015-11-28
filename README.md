@@ -67,6 +67,7 @@ generated code. This happens outside of the ember run loop.
 
 ## Running Tests
 
+* `npm test` (Runs `ember try:testall` to test your addon against multiple Ember versions)
 * `ember test`
 * `ember test --server`
 
@@ -75,4 +76,3 @@ generated code. This happens outside of the ember run loop.
 * `ember build`
 
 For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
-
